@@ -1,0 +1,15 @@
+
+//kolko
+// c.fillStyle = 'rgba(255,0,0,0.5)';
+// c.fillRect(100,100,100,100);
+// c.fillStyle = 'rgba(0,0,255,0.5)';
+// c.fillRect(300,700,100,100);
+// c.fillStyle = 'rgba(0,255,0,0.5)';
+// c.fillRect(500,600,100,100);
+
+// linia
+// c.beginPath();
+// c.moveTo(50,300);
+// c.lineTo(300,100);
+// c.strokeStyle = "#fa34a3"
+// c.stroke();
