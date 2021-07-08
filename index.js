@@ -10,14 +10,16 @@ canvas.height = window.innerHeight - 5
 const catWidth = 120
 const catHeight = 120
 const catY = innerHeight - catHeight - 5
-let catX = innerWidth / 2 - catWidth / 2
-let catchingRangeMax = catX + catWidth
-let catchingRangeMin = catX
+let catX = (innerWidth / 2) - (catWidth / 2)   //187
+let catchingRangeMax = catX + (catWidth)
+let catchingRangeMin = catX - (catWidth*1/2)
 
-const speed = [1, 1.2, 1.7, 1.8, 1.5, 2, 2.1]
+
+const speed = [1, 1.4, 1.8, 2.2, 2.5, 2.8,]
 let cucumberSpeed = speed[Math.floor(Math.random() * speed.length)];
 let waterdropSpeed = speed[Math.floor(Math.random() * speed.length)];
 let mouseSpeed = speed[Math.floor(Math.random() * speed.length)];
+let snaxSpeed = speed[Math.floor(Math.random() * speed.length)];
 
 const startingHeight = 0
 let cucumberX = Math.random() * innerWidth;
@@ -26,6 +28,8 @@ let waterdropX = Math.random() * innerWidth;
 let waterdropY = startingHeight
 let mouseX = Math.random() * innerWidth;
 let mouseY = startingHeight
+let snaxX = Math.random() * innerWidth;
+let snaxY = startingHeight
 
 let gameisRunning = false;
 let didYouLost = false;
@@ -39,14 +43,16 @@ let cat;
 
 // LISTENER ON LEFT MOVE
 window.addEventListener('keydown', function (event) {
-    if ((event.keyCode === 37 || event.keyCode === 65) && gameisRunning ) {
+    if ((event.keyCode === 37 || event.keyCode === 65) && gameisRunning) {
         goLeft = true;
     }
 });
 
+window.addEventListener('click', function(){location.reload()});
+
 // LISTENER ON RIGHT MOVE
 window.addEventListener('keydown', function (event) {
-    if ((event.keyCode === 39 || event.keyCode === 68) && gameisRunning ) {
+    if ((event.keyCode === 39 || event.keyCode === 68) && gameisRunning) {
         goRight = true;
     }
 });
@@ -72,6 +78,8 @@ waterdrop.src = "./images/water.png";
 //GOOD ITEMS
 const mouse = new Image();
 mouse.src = "./images/mouse.png";
+const snax = new Image();
+snax.src = "./images/snax.png";
 
 
 // scores ICONS 
@@ -83,19 +91,28 @@ const lives = new Image()
 lives.src = "./images/lives.png"
 const score = new Image()
 score.src = "./images/score.png"
+const time = new Image()
+time.src = "./images/time.png"
+const level = new Image()
+level.src = "./images/lvl.png"
 
 
 function showLostMenu() {
     c.clearRect(0, 0, innerWidth, innerHeight);
     c.font = "bold 30pt Courier";
     c.textAlign = "center"
-    c.fillText("YOU LOST", innerWidth * 1 / 2, 80);
+    c.fillText("GOOD GAME!", innerWidth * 1 / 2, 80);
     c.font = "bold 10pt Courier";
-    c.fillText("press 'M' to", innerWidth * 1 / 2, 200);
-    c.fillText("return to Try Again", innerWidth * 1 / 2, 300);
+    c.fillText(`Score: ${scores}   Bonus: ${bonuses}`, innerWidth * 1 / 2, 120);
+    c.font = "bold 20pt Courier";
+    c.fillText(`${scores + bonuses} points`, innerWidth * 1 / 2, 200);
+    c.font = "bold 15pt Courier";
+    c.fillText("press 'M' to return to Menu", innerWidth * 1 / 2, 300);
     livesleft = 9;
     bonuses = 0;
     scores = 0;
+    times = 30;
+    levels = 0;
     gameisRunning = false;
     didYouLost = true;
 }
@@ -120,28 +137,59 @@ function showStats() {
     c.drawImage(score, 0, 320, 100, 100)
     c.font = "bold 15pt Courier";
     c.fillText(`${scores}`, 50, 360)
+    c.drawImage(time, 0, 420, 100, 100)
+    c.font = "bold 15pt Courier";
+    c.fillText(`${Math.round(times)}s`, 50, 460)
+    c.drawImage(level, -30, 520, 160, 160)
+    c.font = "bold 25pt Courier";
+    c.fillText(`${levels}`, 50, 585)
     c.stroke();
+}
+
+
+function giveNewPositions() {
+    waterdropY = startingHeight;
+    waterdropX = Math.random() * innerWidth;
+    cucumberY = startingHeight;
+    cucumberX = Math.random() * innerWidth;
+    mouseY = startingHeight;
+    mouseX = Math.random() * innerWidth;
 }
 
 
 function itemsFalling() {
     c.clearRect(0, 0, innerWidth, innerHeight);
     c.beginPath();
-    c.drawImage(cucumber, cucumberX, cucumberY, innerWidth/8, innerWidth/7);
-    c.drawImage(waterdrop, waterdropX, waterdropY, innerWidth/8, innerWidth/7);
-    c.drawImage(mouse, mouseX, mouseY, innerWidth/8, innerWidth/7);
+    c.drawImage(cucumber, cucumberX, cucumberY, 60, 70)
+    c.drawImage(waterdrop, waterdropX, waterdropY, 60, 70)
+    c.drawImage(snax, snaxX, snaxY, 60, 70)
+    c.drawImage(mouse, mouseX, mouseY, 60, 70)
     c.drawImage(cat, catX, catY, catWidth, catHeight);
 }
 
 let livesleft = 9;
 let bonuses = 0;
 let scores = 0;
+let times = 30;
+let levels = 0;
 
 function gameStart() {
+    times -= 0.008
+    cucumber.src = './images/cucumber.png';
+    waterdrop.src = "./images/water.png";
+    mouse.src = "./images/mouse.png";
+    snax.src = "./images/snax.png";
 
     if (livesleft === 0) {
         showLostMenu();
         return;
+    }
+
+
+    if (times <= 0) {
+        levels += 1
+        bonuses += 10
+        times = 29
     }
 
     gameisRunning = true;
@@ -151,8 +199,6 @@ function gameStart() {
         gameStarted = false;
         exit = false;
         player = null;
-        catchingRangeMin = catX
-        catchingRangeMax = catX + catWidth
         return;
     }
     requestAnimationFrame(gameStart);
@@ -161,18 +207,18 @@ function gameStart() {
     //CAT MOVING 
     if (goLeft) {
         if (catX > 5) {
-            catX -= 20
             catchingRangeMin -= 20
             catchingRangeMax -= 20
+            catX -= 20
         }
         goLeft = false;
     }
 
     if (goRight) {
         if (catX < innerWidth - catWidth - 10) {
-            catX += 20;
             catchingRangeMin += 20
             catchingRangeMax += 20
+            catX += 20;
         }
         goRight = false;
     }
@@ -191,6 +237,21 @@ function gameStart() {
     if (mouseY > innerHeight) {
         mouseY = startingHeight;
         mouseX = Math.random() * innerWidth;
+    }
+
+
+    if (
+        Math.round(snaxY) === catY && (snaxX < catchingRangeMax && snaxX > catchingRangeMin)
+    ) {
+        scores += 5
+        snaxY = startingHeight;
+        snaxX = Math.random() * innerWidth;
+    }
+
+
+    if (snaxY > innerHeight) {
+        snaxY = startingHeight;
+        snaxX = Math.random() * innerWidth;
     }
 
 
@@ -226,6 +287,7 @@ function gameStart() {
     cucumberY += cucumberSpeed
     waterdropY += waterdropSpeed
     mouseY += mouseSpeed
+    snaxY += snaxSpeed
 
 
     // CHECK IF LOSE 
@@ -235,6 +297,11 @@ function gameStart() {
 
 function instructions() {
     c.clearRect(0, 0, innerWidth, innerHeight);
+
+    goLeft = false;
+    goRight = false;
+
+
     kropula.src = "./images/kro.png";
     szarutka.src = "./images/szar.png";
     c.font = "bold 2rem Courier";
@@ -250,7 +317,7 @@ function instructions() {
         }
     }
     c.font = "bold 0.8rem Courier";
-    c.fillText(`for KROPKA press K`, innerWidth * 1 / 2 - catWidth/1.5, 350)
+    c.fillText(`for KROPKA press K`, innerWidth * 1 / 2 - catWidth / 1.5, 350)
 
     if (player === "szarutka") {
         c.drawImage(szarutkagreen, innerWidth * 1 / 2, 150, catWidth, catHeight)
@@ -260,16 +327,16 @@ function instructions() {
         }
     }
     c.font = "bold 0.8rem Courier";
-    c.fillText(`for SZARA press S`, innerWidth * 1 / 2  + catWidth/1.5, 350, catY, 200)
+    c.fillText(`for SZARA press S`, innerWidth * 1 / 2 + catWidth / 1.5, 350, catY, 200)
 
     c.font = "bold 1.5rem Courier";
-     c.fillText(`press SPACE to START`, canvas.width / 2, 520);
+    c.fillText(`press SPACE to START`, canvas.width / 2, 520);
 }
 
 instructions()
 
 window.addEventListener('keydown', function (event) {
-    if (event.keyCode === 75 && !gameisRunning && !didYouLost ) {
+    if (event.keyCode === 75 && !gameisRunning && !didYouLost) {
         player = "kropulka"
         cat = kropula;
         instructions();
@@ -279,7 +346,7 @@ window.addEventListener('keydown', function (event) {
 
 
 window.addEventListener('keydown', function (event) {
-    if (event.keyCode === 83 && !gameisRunning && !didYouLost ) {
+    if (event.keyCode === 83 && !gameisRunning && !didYouLost) {
         player = "szarutka"
         cat = szarutka;
         instructions();
@@ -288,14 +355,14 @@ window.addEventListener('keydown', function (event) {
 });
 
 window.addEventListener('keydown', function (event) {
-    if (event.keyCode === 32 && player && !gameisRunning && !didYouLost ) {
+    if (event.keyCode === 32 && player && !gameisRunning && !didYouLost) {
         gameStart();
     }
 });
 
 
 window.addEventListener('keydown', function (event) {
-    if (event.keyCode === 27 && gameIsRunning) {
+    if (event.keyCode === 27 && gameisRunning) {
         exit = true;
     }
 });
